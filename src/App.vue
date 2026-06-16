@@ -27,7 +27,7 @@
 
 <script>
 
-import Container from './components/Container'
+import Container from './components/Container.vue'
 import postdata from './assets/postdata.js'
 import axios from 'axios'
 
