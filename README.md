@@ -1,4 +1,4 @@
-# vuestargram
+# sizzle
 
 ## Project setup
 ```
