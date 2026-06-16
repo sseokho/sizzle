@@ -4,13 +4,16 @@
       <li>Cancel</li>
     </ul>
     <ul class="header-button-right">
-      <li>Next</li>
+      <li v-if="step == 1" @click="step++">Next</li>
+      <li v-if="step == 2" @click="publish">글쓰기</li>
     </ul>
     <img src="./assets/logo.png" class="logo" />
   </div>
 
-  <Container :instarData="instarData" :파일객체="파일객체" :탭여부="탭여부" :url="url"/>
-  <button @click="more(); moreCount()">더보기</button>
+  <button @click="more">더보기</button>
+
+  <Container :이미지="이미지" :step="step" @write="작성한글 = $event" />
+
 
   <div class="footer">
     <ul class="footer-button-plus">
@@ -19,73 +22,64 @@
     </ul>
   </div>
 
-  <!--
-  <div v-if="탭여부 == 1">내용0</div>
-  <div v-if="탭여부 == 2">내용1</div>
-  <div v-if="탭여부 == 3">내용2</div>
-  <button @click="탭여부 = 1">버튼0</button>
-  <button @click="탭여부 = 2">버튼1</button>
-  <button @click="탭여부 = 3">버튼2</button>
-  <div style="margin-top:500px"></div>
-  -->
+
 </template>
 
 <script>
-import Container from './components/Container'
-import instarData from './assets/instarData.js'
-import axios from 'axios'
-axios.get()
 
+import Container from './components/Container'
+import postdata from './assets/postdata.js'
+import axios from 'axios'
 
 export default {
   name: 'App',
-  data(){
+  data() {
     return {
-      instarData : instarData,
-      num : 0,
-      탭여부 : 1,
-      url : '',
+      게시물: postdata,
+      더보기: 0,
+      step: 0,
+      이미지: '',
+      작성한글: '',
+      받은필터값 : '',
     }
   },
-  watch : {
-    num(a){
-      if(a==2){
-        return;
-      }
-    }
+  mounted() {
+    this.emitter.on('박스클릭함', (a) => {
+      this.받은필터값 = a;
+    })
   },
   components: {
-    Container
+    Container,
   },
-  methods : {
-    moreCount(){
-      this.num++;
+  methods: {
+    publish() {
+      var 내게시물 = {
+        name: "Kim Hyun",
+        userImage: "https://picsum.photos/100?random=3",
+        postImage: this.이미지,
+        likes: 36,
+        date: "May 15",
+        liked: false,
+        content: this.작성한글,
+        filter: this.받은필터값
+      };
+
+      this.게시물.unshift(내게시물);
+      this.step = 0;
     },
-    
-    more(){
-      
-      axios.get(`https://codingapple1.github.io/vue/more${this.num}.json`).
-      then((결과)=>{
-        console.log(결과.data);
-        this.instarData.push(결과.data)
-      })
-      .catch((error)=>{
-        console.error(error);
+    more() {
+      axios.get(`https://codingapple1.github.io/vue/more${this.더보기}.json`).then(결과 => {
+        this.게시물.push(결과.data)
+        this.더보기++;
       })
     },
     upload(e) {
-      let 파일객체 = e.target.files;
-      if (파일객체 && 파일객체[0]) {  // 파일이 선택되었을 경우만 처리
-        let url = URL.createObjectURL(파일객체[0]);
-        this.url = url;
-        this.탭여부++;  // 탭을 증가
-      } else {
-        console.error("파일이 없습니다");
-      }
+      let 파일 = e.target.files;
+      let url = URL.createObjectURL(파일[0]);
+      this.이미지 = url;
+      this.step++;
     }
-  },
-  
-
+  }
 }
 </script>
 

@@ -2,12 +2,13 @@
     <div class="post">
         <div class="post-header">
             <div class="profile"></div>
-            <span class="profile-name">{{instarData.name}}</span>
+            <span class="profile-name">{{ 스토어게시물.name }}</span>
         </div>
-        <div class="post-body" :style="{ backgroundImage : `url(${instarData.postImage})`}"></div>
+        <div @click="handleClick" :class="스토어게시물.filter" class="post-body"
+            :style="{ backgroundImage: `url(${스토어게시물.postImage})` }"></div>
         <div class="post-content">
-            <p>{{ instarData.likes }}</p>
-            <p><strong>{{ instarData.name }}</strong> {{ instarData.content }}</p>
+            <p>{{ 스토어게시물.likes }}</p>
+            <p><strong>{{ 스토어게시물.name }}</strong> {{ 스토어게시물.content }}</p>
             <p class="date">May 15</p>
         </div>
     </div>
@@ -17,10 +18,14 @@
 export default {
     name: 'Post',
     props: {
-        instarData:{
-            type: Array
+        스토어게시물 : Object,
+    },
+    methods:{
+        handleClick(){
+            this.$store.commit('좋아요', this.스토어게시물);  // 전체 게시물 객체를 전달하여 상태 변경
         }
     }
+
 }
 </script>
 
