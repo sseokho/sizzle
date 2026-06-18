@@ -7,6 +7,9 @@ const store = createStore({
         return {
             스토어게시물: 전체게시물,
             더보기 : 0,
+            isLoggedIn: false,
+            currentUser: null,
+            following: [],   // 내가 팔로우하는 uid 목록
         }
     },
     mutations: {
@@ -20,6 +23,18 @@ const store = createStore({
                 targetPost.liked = !targetPost.liked;
                 targetPost.likes += targetPost.liked ? 1 : -1;
             }
+        },
+        login(state, user) {
+            state.isLoggedIn = true
+            state.currentUser = user
+        },
+        logout(state) {
+            state.isLoggedIn = false
+            state.currentUser = null
+            state.following = []
+        },
+        setFollowing(state, followingList) {
+            state.following = followingList
         },
     },
     actions: {

@@ -5,7 +5,7 @@
 
       <div class="post-header" v-for="(a,i) in follower" :key="i">
         <div class="profile" :style="`background-image:url(${a.image})`"></div>
-        <span class="profile-name">{{ a.name }}</span>
+        <span class="profile-name">{{ user?.nickname }}</span>
       </div>
 
     </div> 
@@ -18,6 +18,11 @@ export default{
     name : 'mypage',
     props : {
         one : Number,
+    },
+    computed: {
+        user() {
+            return this.$store.state.currentUser
+        }   
     },
     setup(){
         let follower = ref([{
@@ -47,7 +52,7 @@ export default{
                 follower.value = a.data;
             })
         })
-
+        
         return {follower, doThis}
     },
 }

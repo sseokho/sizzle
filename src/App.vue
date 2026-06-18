@@ -1,174 +1,150 @@
 <template>
-  <div class="header">
-    <ul class="header-button-left">
-      <li>Cancel</li>
-    </ul>
-    <ul class="header-button-right">
-      <li v-if="step == 1" @click="step++">Next</li>
-      <li v-if="step == 2" @click="publish">글쓰기</li>
-    </ul>
-    <img src="./assets/logo.png" class="logo" />
-  </div>
-
-  <button @click="more">더보기</button>
-
-  <Container :이미지="이미지" :step="step" @write="작성한글 = $event" />
-
-
-  <div class="footer">
-    <ul class="footer-button-plus">
-      <input @change="upload" accept="image/*" type="file" id="file" class="inputfile" />
-      <label for="file" class="input-plus">+</label>
-    </ul>
-  </div>
-
-
+  <router-view />
 </template>
 
 <script>
-
-import Container from './components/Container.vue'
-import postdata from './assets/postdata.js'
-import axios from 'axios'
-
 export default {
-  name: 'App',
-  data() {
-    return {
-      게시물: postdata,
-      더보기: 0,
-      step: 0,
-      이미지: '',
-      작성한글: '',
-      받은필터값 : '',
-    }
-  },
-  mounted() {
-    this.emitter.on('박스클릭함', (a) => {
-      this.받은필터값 = a;
-    })
-  },
-  components: {
-    Container,
-  },
-  methods: {
-    publish() {
-      var 내게시물 = {
-        name: "Kim Hyun",
-        userImage: "https://picsum.photos/100?random=3",
-        postImage: this.이미지,
-        likes: 36,
-        date: "May 15",
-        liked: false,
-        content: this.작성한글,
-        filter: this.받은필터값
-      };
-
-      this.게시물.unshift(내게시물);
-      this.step = 0;
-    },
-    more() {
-      axios.get(`https://codingapple1.github.io/vue/more${this.더보기}.json`).then(결과 => {
-        this.게시물.push(결과.data)
-        this.더보기++;
-      })
-    },
-    upload(e) {
-      let 파일 = e.target.files;
-      let url = URL.createObjectURL(파일[0]);
-      this.이미지 = url;
-      this.step++;
-    }
-  }
+  name: "App"
 }
+
 </script>
 
 <style>
-body {
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-ul {
-  padding: 5px;
-  list-style-type: none;
-}
-
-.logo {
-  width: 22px;
-  margin: auto;
-  display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 13px;
-}
-
-.header {
-  width: 100%;
-  height: 40px;
-  background-color: white;
-  padding-bottom: 8px;
-  position: sticky;
-  top: 0;
-}
-
-.header-button-left {
-  color: skyblue;
-  float: left;
-  width: 50px;
-  padding-left: 20px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.header-button-right {
-  color: skyblue;
-  float: right;
-  width: 50px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.footer {
-  width: 100%;
-  position: sticky;
-  bottom: 0;
-  padding-bottom: 10px;
-  background-color: white;
-}
-
-.footer-button-plus {
-  width: 80px;
-  margin: auto;
-  text-align: center;
-  cursor: pointer;
-  font-size: 24px;
-  padding-top: 12px;
-}
-
-.sample-box {
-  width: 100%;
-  height: 600px;
-  background-color: bisque;
-}
-
-.inputfile {
-  display: none;
-}
-
-.input-plus {
-  cursor: pointer;
+body {
+  background: #F4ECE4;
+  font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
 }
 
 #app {
-  box-sizing: border-box;
-  font-family: "consolas";
-  margin-top: 60px;
-  width: 100%;
-  max-width: 460px;
-  margin: auto;
+  max-width: 430px;
+  margin: 0 auto;
+  background: #FFFDFB;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  border-right: 1px solid #eee;
-  border-left: 1px solid #eee;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 10px;
+  background: #FFFDFB;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-logo {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 27px;
+  font-weight: 800;
+  color: #E8451F;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.header-icons {
+  display: flex;
+  gap: 17px;
+  color: #241a14;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #241a14;
+  padding: 0;
+  display: flex;
+}
+
+/* 카테고리 바 */
+.category-bar {
+  display: flex;
+  gap: 8px;
+  padding: 2px 16px 12px;
+  overflow-x: auto;
+  background: #FFFDFB;
+  scrollbar-width: none;
+}
+
+.category-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-btn {
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #C25A2E;
+  background: #FFF1E8;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.cat-btn.active {
+  color: #fff;
+  background: #FF6A3D;
+  font-weight: 700;
+  box-shadow: 0 5px 14px rgba(255, 106, 61, 0.36);
+}
+
+/* 피드 */
+.feed {
+  flex: 1;
+  padding-bottom: 80px;
+}
+
+/* 하단 네비 */
+.bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 11px 0 20px;
+  background: #fff;
+  border-top: 1px solid #F1E4D8;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #C7B4A6;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-btn.active {
+  color: #FF6A3D;
+}
+
+.nav-plus {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FF7A45, #F4442E);
+  box-shadow: 0 8px 18px rgba(244, 68, 46, 0.34);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 </style>
