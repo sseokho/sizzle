@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <path fill="black" d="
+  <rect width="32" height="32" rx="7" fill="#E8451F"/>
+  <!-- S path — manually traced, rounded bold style -->
+  <path fill="white" d="
     M20.5 10.5
     C20.5 8.0 18.5 6.5 16 6.5
     C13.2 6.5 11 8.3 11 10.8
