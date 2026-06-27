@@ -47,7 +47,7 @@
         @click="selectedIndex = i"
       >
         <div class="restaurant-thumb">
-          <img :src="item.img" :alt="item.dish" />
+          <img :src="item.imgUrl || item.img" :alt="item.dish" />
           <div class="restaurant-cat">{{ item.cat }}</div>
         </div>
         <div class="restaurant-info">
