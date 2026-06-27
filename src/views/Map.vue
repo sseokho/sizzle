@@ -63,7 +63,7 @@
             <svg width="13" height="13" viewBox="0 0 24 24" fill="#F4442E" stroke="#F4442E" stroke-width="1.5" stroke-linejoin="round">
               <path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
             </svg>
-            <span>{{ item.likes.toLocaleString() }}</span>
+            <span>{{ (item.likedBy?.length ?? item.likes ?? 0).toLocaleString() }}</span>
           </div>
         </div>
       </div>

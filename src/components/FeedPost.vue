@@ -167,7 +167,7 @@ export default {
       return this.post.savedBy?.includes(this.currentUid) ?? false
     },
     likesCount() {
-      return this.post.likedBy?.length ?? 0
+      return this.post.likedBy?.length ?? this.post.likes ?? 0
     },
     commentCount() {
       return this.post.commentList?.length ?? 0
