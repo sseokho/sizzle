@@ -106,12 +106,12 @@ export default {
     },
   },
   mounted() {
-    this.initMap()
+    if (typeof window.kakao !== 'undefined' && window.kakao.maps) {
+      window.kakao.maps.load(() => this.initMap())
+    }
   },
   methods: {
     initMap() {
-      if (typeof window.kakao === 'undefined' || !window.kakao.maps) return
-
       this.mapReady = true
       const container = this.$refs.mapEl
       const options = {

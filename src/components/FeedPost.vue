@@ -78,8 +78,26 @@
     <transition name="comment-slide">
       <div v-if="showComments" class="comment-panel">
         <div v-for="(c, i) in post.commentList" :key="i" class="comment-item">
-          <span class="comment-name">{{ c.name }}</span>
-          <span class="comment-text">{{ c.text }}</span>
+          <div class="comment-main">
+            <template v-if="editingIndex === i">
+              <input
+                v-model="editInput"
+                class="comment-edit-input"
+                @keyup.enter="saveEdit(i)"
+                @keyup.esc="cancelEdit"
+              />
+              <button class="comment-edit-save" @click="saveEdit(i)">저장</button>
+              <button class="comment-edit-cancel" @click="cancelEdit">취소</button>
+            </template>
+            <template v-else>
+              <span class="comment-name">{{ c.name }}</span>
+              <span class="comment-text">{{ c.text }}</span>
+            </template>
+          </div>
+          <div v-if="c.uid && c.uid === currentUid && editingIndex !== i" class="comment-actions">
+            <button class="comment-action-btn" @click="startEdit(i, c.text)">수정</button>
+            <button class="comment-action-btn delete" @click="deleteComment(i)">삭제</button>
+          </div>
         </div>
         <div v-if="!post.commentList || post.commentList.length === 0" class="comment-empty">
           첫 번째 댓글을 남겨보세요
@@ -116,7 +134,7 @@
 </template>
 
 <script>
-import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore'
+import { doc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 
 export default {
@@ -131,6 +149,8 @@ export default {
       toastTimer: null,
       showComments: false,
       commentInput: '',
+      editingIndex: null,
+      editInput: '',
     }
   },
   computed: {
@@ -189,12 +209,36 @@ export default {
       const user = this.$store.state.currentUser
       await updateDoc(doc(db, 'posts', this.post.id), {
         commentList: arrayUnion({
+          uid: user.uid,
           name: user.nickname || user.email?.split('@')[0] || '익명',
           text,
         }),
       })
       this.commentInput = ''
       this.showComments = true
+    },
+    startEdit(index, text) {
+      this.editingIndex = index
+      this.editInput = text
+    },
+    cancelEdit() {
+      this.editingIndex = null
+      this.editInput = ''
+    },
+    async saveEdit(index) {
+      const text = this.editInput.trim()
+      if (!text) return
+      const snap = await getDoc(doc(db, 'posts', this.post.id))
+      const list = [...(snap.data().commentList || [])]
+      list[index] = { ...list[index], text }
+      await updateDoc(doc(db, 'posts', this.post.id), { commentList: list })
+      this.cancelEdit()
+    },
+    async deleteComment(index) {
+      const snap = await getDoc(doc(db, 'posts', this.post.id))
+      const list = [...(snap.data().commentList || [])]
+      list.splice(index, 1)
+      await updateDoc(doc(db, 'posts', this.post.id), { commentList: list })
     },
     async sharePost() {
       const text = `${this.post.dish}${this.post.area ? ' · ' + this.post.area : ''}\n${this.post.caption || ''}\n#sizzle`
@@ -398,6 +442,75 @@ export default {
   font-size: 14px;
   color: #2e2017;
   line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comment-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.comment-action-btn {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: #9a8579;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.comment-action-btn.delete {
+  color: #F4442E;
+}
+
+.comment-edit-input {
+  flex: 1;
+  border: none;
+  border-bottom: 1.5px solid #E8451F;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: #241a14;
+  outline: none;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.comment-edit-save {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #E8451F;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.comment-edit-cancel {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a8579;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .comment-name {
