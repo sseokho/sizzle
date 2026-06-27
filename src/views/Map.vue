@@ -106,9 +106,14 @@ export default {
     },
   },
   mounted() {
-    if (typeof window.kakao !== 'undefined' && window.kakao.maps) {
-      window.kakao.maps.load(() => this.initMap())
+    const load = () => {
+      if (typeof window.kakao !== 'undefined' && window.kakao.maps) {
+        window.kakao.maps.load(() => this.initMap())
+      } else {
+        setTimeout(load, 300)
+      }
     }
+    load()
   },
   methods: {
     initMap() {
