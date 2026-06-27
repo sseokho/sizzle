@@ -52,16 +52,35 @@
         />
       </div>
 
-      <!-- 지역 -->
+      <!-- 식당 검색 -->
       <div class="field">
-        <label class="field-label">지역</label>
-        <input
-          v-model="area"
-          type="text"
-          placeholder="예) 을지로3가, 연남동"
-          class="input-field"
-          maxlength="20"
-        />
+        <label class="field-label">식당 검색</label>
+        <div class="place-search-wrap">
+          <input
+            v-model="placeQuery"
+            type="text"
+            placeholder="식당 이름으로 검색"
+            class="input-field"
+            @input="onPlaceInput"
+            @keyup.enter="searchPlace"
+          />
+          <button class="place-search-btn" @click="searchPlace">검색</button>
+        </div>
+        <div v-if="placeResults.length" class="place-results">
+          <div
+            v-for="p in placeResults"
+            :key="p.id"
+            class="place-result-item"
+            @click="selectPlace(p)"
+          >
+            <div class="place-result-name">{{ p.place_name }}</div>
+            <div class="place-result-addr">{{ p.road_address_name || p.address_name }}</div>
+          </div>
+        </div>
+        <div v-if="selectedPlace" class="place-selected">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E8451F" stroke-width="2.5" stroke-linecap="round"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          {{ selectedPlace.place_name }} · {{ area }}
+        </div>
       </div>
 
       <!-- 카테고리 -->
@@ -129,6 +148,11 @@ export default {
       loading: false,
       errorMsg: '',
       categories: ['한식', '일식', '양식', '카페·디저트', '분식', '기타'],
+      placeQuery: '',
+      placeResults: [],
+      selectedPlace: null,
+      lat: null,
+      lng: null,
     }
   },
   computed: {
@@ -151,6 +175,30 @@ export default {
         }
         img.src = URL.createObjectURL(file)
       })
+    },
+    searchPlace() {
+      const ps = new window.kakao.maps.services.Places()
+      ps.keywordSearch(this.placeQuery, (data, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          this.placeResults = data.slice(0, 5)
+        } else {
+          this.placeResults = []
+        }
+      })
+    },
+    onPlaceInput() {
+      if (!this.placeQuery.trim()) {
+        this.placeResults = []
+        this.selectedPlace = null
+      }
+    },
+    selectPlace(p) {
+      this.selectedPlace = p
+      this.placeQuery = p.place_name
+      this.placeResults = []
+      this.area = p.address_name?.split(' ').slice(1, 3).join(' ') || ''
+      this.lat = parseFloat(p.y)
+      this.lng = parseFloat(p.x)
     },
     triggerFileInput() {
       this.$refs.fileInput.click()
@@ -178,6 +226,9 @@ export default {
           avBg:        '#FFD8A8',
           avFg:        '#B5642E',
           area:        this.area.trim(),
+          restaurant:  this.selectedPlace?.place_name || '',
+          lat:         this.lat,
+          lng:         this.lng,
           imgUrl,
           dish:        this.dish.trim(),
           cat:         this.selectedCat,
@@ -408,6 +459,72 @@ export default {
   color: #fff;
   background: #FF6A3D;
   box-shadow: 0 4px 12px rgba(255,106,61,.3);
+}
+
+.place-search-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.place-search-wrap .input-field {
+  flex: 1;
+}
+
+.place-search-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #E8451F;
+  border: none;
+  border-radius: 14px;
+  padding: 0 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.place-results {
+  border: 1.5px solid #F1E4D8;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.place-result-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #F4ECE4;
+  transition: background 0.1s;
+}
+
+.place-result-item:last-child {
+  border-bottom: none;
+}
+
+.place-result-item:active {
+  background: #FFF6EF;
+}
+
+.place-result-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #241a14;
+}
+
+.place-result-addr {
+  font-size: 12px;
+  color: #9a8579;
+  margin-top: 2px;
+}
+
+.place-selected {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #E8451F;
+  padding: 4px 2px;
 }
 
 .error-banner {

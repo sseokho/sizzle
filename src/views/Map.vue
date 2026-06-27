@@ -75,14 +75,8 @@
 
 <script>
 import BottomNav from '@/components/BottomNav.vue'
-import postdata from '@/assets/postdata.js'
-
-// 서울 주요 지역 좌표 (geocoding 대신 hardcode)
-const COORDS = {
-  '멘야하나비 을지로': { lat: 37.5662, lng: 126.9937 },
-  '버터레코드 연남':   { lat: 37.5585, lng: 126.9267 },
-  '부처스컷 한남':     { lat: 37.5349, lng: 126.9995 },
-}
+import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 export default {
   name: 'MapPage',
@@ -92,20 +86,28 @@ export default {
       searchQuery: '',
       selectedIndex: null,
       mapReady: false,
+      posts: [],
+      unsubscribe: null,
     }
   },
   computed: {
     filteredRestaurants() {
       const q = this.searchQuery.trim().toLowerCase()
-      if (!q) return postdata
-      return postdata.filter(p =>
-        p.restaurant.toLowerCase().includes(q) ||
-        p.area.toLowerCase().includes(q) ||
-        p.cat.toLowerCase().includes(q)
+      if (!q) return this.posts
+      return this.posts.filter(p =>
+        p.restaurant?.toLowerCase().includes(q) ||
+        p.area?.toLowerCase().includes(q) ||
+        p.cat?.toLowerCase().includes(q)
       )
     },
   },
   mounted() {
+    const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'))
+    this.unsubscribe = onSnapshot(q, (snap) => {
+      this.posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      if (this.mapReady) this.refreshMarkers()
+    })
+
     const load = () => {
       if (typeof window.kakao !== 'undefined') {
         window.kakao.maps.load(() => this.initMap())
@@ -115,36 +117,45 @@ export default {
     }
     load()
   },
+  beforeUnmount() {
+    this.unsubscribe?.()
+  },
   methods: {
     initMap() {
       this.mapReady = true
       const container = this.$refs.mapEl
       const options = {
         center: new window.kakao.maps.LatLng(37.5500, 126.9800),
-        level: 5,
+        level: 7,
       }
-      const map = new window.kakao.maps.Map(container, options)
+      this.map = new window.kakao.maps.Map(container, options)
+      this.markers = []
+      this.refreshMarkers()
+    },
+    refreshMarkers() {
+      if (!this.map) return
+      this.markers?.forEach(m => m.setMap(null))
+      this.markers = []
 
-      postdata.forEach(post => {
-        const coords = COORDS[post.restaurant]
-        if (!coords) return
+      this.posts.forEach(post => {
+        if (!post.lat || !post.lng) return
 
         const marker = new window.kakao.maps.Marker({
-          position: new window.kakao.maps.LatLng(coords.lat, coords.lng),
-          map,
+          position: new window.kakao.maps.LatLng(post.lat, post.lng),
+          map: this.map,
         })
 
         const infoContent = `
           <div style="padding:10px 14px;font-family:Pretendard,sans-serif;min-width:160px;">
-            <div style="font-weight:700;font-size:14px;color:#241a14;">${post.restaurant}</div>
+            <div style="font-weight:700;font-size:14px;color:#241a14;">${post.restaurant || post.dish}</div>
             <div style="font-size:12px;color:#C25A2E;margin-top:2px;">${post.dish} · ${post.cat}</div>
           </div>
         `
         const infoWindow = new window.kakao.maps.InfoWindow({ content: infoContent })
-
         window.kakao.maps.event.addListener(marker, 'click', () => {
-          infoWindow.open(map, marker)
+          infoWindow.open(this.map, marker)
         })
+        this.markers.push(marker)
       })
     },
   },
