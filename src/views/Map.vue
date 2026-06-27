@@ -107,7 +107,7 @@ export default {
   },
   mounted() {
     const load = () => {
-      if (typeof window.kakao !== 'undefined' && window.kakao.maps) {
+      if (typeof window.kakao !== 'undefined') {
         window.kakao.maps.load(() => this.initMap())
       } else {
         setTimeout(load, 300)
