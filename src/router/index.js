@@ -7,6 +7,7 @@ import Map from '../views/Map.vue'
 import Explore from '../views/Explore.vue'
 import Profile from '../views/Profile.vue'
 import Upload from '../views/Upload.vue'
+import Seed from '../views/Seed.vue'
 
 const routes = [
   { path: '/',         redirect: '/home' },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/explore',  component: Explore },
   { path: '/profile',  component: Profile },
   { path: '/upload',   component: Upload },
+  { path: '/seed',     component: Seed },
 ]
 
 const router = createRouter({

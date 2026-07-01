@@ -105,7 +105,6 @@ body {
 /* 피드 */
 .feed {
   flex: 1;
-  padding-bottom: 80px;
 }
 
 /* 하단 네비 */
